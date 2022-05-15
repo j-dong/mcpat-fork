@@ -1,0 +1,144 @@
+<component id="root" name="root">
+	<component id="system" name="system">
+		<!--McPAT will skip the components if number is set to 0 -->
+		<stat name="total_cycles" value="100000"/>
+		<stat name="idle_cycles" value="0"/>
+		<stat name="busy_cycles"  value="100000"/>
+		<component id="system.core0" name="core0">
+			RAM-based scheme will have free list, status table;
+			<!-- general stats, defines simulation periods;require total, idle, and busy cycles for sanity check  -->
+			<stat name="total_instructions" value="1600000"/>
+			<stat name="int_instructions" value="1200000"/>
+			<stat name="fp_instructions" value="40000"/>
+			<stat name="branch_instructions" value="0"/>
+			<stat name="branch_mispredictions" value="0"/>
+			<stat name="load_instructions" value="200000"/>
+			<stat name="store_instructions" value="200000"/>
+			<stat name="committed_instructions" value="1600000"/>
+			<stat name="committed_int_instructions" value="1200000"/>
+			<stat name="committed_fp_instructions" value="40000"/>
+			<stat name="pipeline_duty_cycle" value="0.5"/><!--<=1, runtime_ipc/peak_ipc; averaged for all cores if homogeneous -->
+			<!-- the following cycle stats are used for heterogeneous cores only, 
+			<stat name="total_cycles" value="100000"/>
+		    <stat name="idle_cycles" value="0"/>
+		    <stat name="busy_cycles"  value="100000"/>
+			<!-- instruction buffer stats -->
+			<!-- ROB stats, both RS and Phy based OoOs have ROB
+			<stat name="ROB_reads" value="0"/>
+			<stat name="ROB_writes" value="0"/>
+			<stat name="rename_accesses" value="0"/>
+			<stat name="fp_rename_accesses" value="0"/>
+			<!-- Inst window stats -->
+			<stat name="inst_window_reads" value="0"/>
+			<stat name="inst_window_writes" value="0"/>
+			<stat name="inst_window_wakeup_accesses" value="0"/>
+			<stat name="fp_inst_window_reads" value="0"/>
+			<stat name="fp_inst_window_writes" value="0"/>
+			<stat name="fp_inst_window_wakeup_accesses" value="0"/>
+			<stat name="int_regfile_reads" value="3200000"/>
+			<stat name="float_regfile_reads" value="80000"/>
+			<stat name="int_regfile_writes" value="1600000"/>
+			<stat name="float_regfile_writes" value="40000"/>
+			<stat name="function_calls" value="5"/>
+			<stat name="context_switches" value="260343"/>
+			<!-- Alu stats by default, the processor has one FPU that includes the divider and 
+			<stat name="ialu_accesses" value="1600000"/>			
+			<stat name="fpu_accesses" value="10000"/>
+			<stat name="mul_accesses" value="100000"/>
+			<stat name="cdb_alu_accesses" value="1200000"/>
+			<stat name="cdb_mul_accesses" value="0"/>
+			<stat name="cdb_fpu_accesses" value="0"/>
+			based on param and stats of last level cache
+			The same rule applies to all cache access stats too!  -->
+			<stat name="IFU_duty_cycle" value="0.5"/><!-- dual thread/inst buffer share the same Icache/Itlb -->			
+			<stat name="LSU_duty_cycle" value="0.25"/>
+			<stat name="MemManU_I_duty_cycle" value="0.5"/>
+			<stat name="MemManU_D_duty_cycle" value="0.25"/>
+			<stat name="ALU_duty_cycle" value="0.9"/>
+			<stat name="MUL_duty_cycle" value="0"/>
+			<stat name="FPU_duty_cycle" value="0.6"/>
+			<stat name="ALU_cdb_duty_cycle" value="0.9"/>
+			<stat name="MUL_cdb_duty_cycle" value="0"/>
+			<stat name="FPU_cdb_duty_cycle" value="0.6"/>	
+			<component id="system.core0.predictor" name="PBT">
+			</component>
+			<component id="system.core0.itlb" name="itlb">
+				<stat name="total_accesses" value="800000"/>
+				<stat name="total_misses" value="4"/>
+				<stat name="conflicts" value="0"/>	
+			</component>
+			<component id="system.core0.icache" name="icache">
+				<stat name="read_accesses" value="200000"/>
+				<stat name="read_misses" value="0"/>
+				<stat name="conflicts" value="0"/>				
+			</component>
+			<component id="system.core0.dtlb" name="dtlb">
+				<stat name="total_accesses" value="200000"/>
+				<stat name="total_misses" value="4"/>
+				<stat name="conflicts" value="0"/>	
+			</component>
+			<component id="system.core0.dcache" name="dcache">
+				<stat name="read_accesses" value="200000"/>
+				<stat name="write_accesses" value="27276"/>
+				<stat name="read_misses" value="1632"/>
+				<stat name="write_misses" value="183"/>
+				<stat name="conflicts" value="0"/>	
+			</component>
+			<component id="system.core0.BTB" name="BTB">
+			</component>
+	</component>
+		<component id="system.L1Directory0" name="L1Directory0">
+				<stat name="read_accesses" value="800000"/>
+				<stat name="write_accesses" value="27276"/>
+				<stat name="read_misses" value="1632"/>
+				<stat name="write_misses" value="183"/>
+				<stat name="conflicts" value="20"/>	
+				<stat name="duty_cycle" value="0.45"/>	
+		</component>
+		<component id="system.L2Directory0" name="L2Directory0">
+				<stat name="read_accesses" value="58824"/>
+				<stat name="write_accesses" value="27276"/>
+				<stat name="read_misses" value="1632"/>
+				<stat name="write_misses" value="183"/>
+				<stat name="conflicts" value="100"/>
+				<stat name="duty_cycle" value="0.45"/>				    
+		</component>
+		<component id="system.L20" name="L20">
+				<stat name="read_accesses" value="400000"/>
+				<stat name="write_accesses" value="0"/>
+				<stat name="read_misses" value="0"/>
+				<stat name="write_misses" value="0"/>
+				<stat name="conflicts" value="0"/>	
+			    <stat name="duty_cycle" value="0.25"/>	
+		</component>
+<component id="system.L30" name="L30">
+				<stat name="read_accesses" value="58824"/>
+				<stat name="write_accesses" value="27276"/>
+				<stat name="read_misses" value="1632"/>
+				<stat name="write_misses" value="183"/>
+				<stat name="conflicts" value="0"/>	
+			    <stat name="duty_cycle" value="0.25"/>				
+		</component>
+		<component id="system.NoC0" name="noc0">
+			<stat name="total_accesses" value="160000"/>
+		    <stat name="duty_cycle" value="0.1"/>
+		</component>
+		<component id="system.mc" name="mc">
+			<stat name="memory_accesses" value="66666"/>
+			<stat name="memory_reads" value="33333"/>
+			<stat name="memory_writes" value="33333"/>
+		</component>
+		<component id="system.niu" name="niu">
+			<stat name="duty_cycle" value="1.0"/> <!-- achievable max load <= 1.0 -->
+			<stat name="total_load_perc" value="0.7"/> <!-- ratio of total achieved load to total achieve-able bandwidth  -->
+		</component>
+		<component id="system.pcie" name="pcie">
+			<stat name="duty_cycle" value="1.0"/> <!-- achievable max load <= 1.0 -->
+			<stat name="total_load_perc" value="0.7"/> <!-- Percentage of total achieved load to total achieve-able bandwidth  -->
+		</component>
+		<component id="system.flashc" name="flashc">
+			<stat name="duty_cycle" value="1.0"/> <!-- achievable max load <= 1.0 -->
+			<stat name="total_load_perc" value="0.7"/> <!-- Percentage of total achieved load to total achieve-able bandwidth  -->
+		</component>
+		</component>
+</component>

@@ -1,0 +1,114 @@
+		total_cycles 100000
+		core 0
+			total_instructions 1600000
+			int_instructions 1200000
+			fp_instructions 40000
+			branch_instructions 0
+			branch_mispredictions 0
+			load_instructions 200000
+			store_instructions 200000
+			committed_instructions 1600000
+			committed_int_instructions 1200000
+			committed_fp_instructions 40000
+			pipeline_duty_cycle 0.5
+			total_cycles 100000
+		    idle_cycles 0
+		    busy_cycles 100000
+			ROB_reads 0
+			ROB_writes 0
+			rename_accesses 0
+			fp_rename_accesses 0
+			inst_window_reads 0
+			inst_window_writes 0
+			inst_window_wakeup_accesses 0
+			fp_inst_window_reads 0
+			fp_inst_window_writes 0
+			fp_inst_window_wakeup_accesses 0
+			int_regfile_reads 3200000
+			float_regfile_reads 80000
+			int_regfile_writes 1600000
+			float_regfile_writes 40000
+			function_calls 5
+			context_switches 260343
+			ialu_accesses 1600000			
+			fpu_accesses 10000
+			mul_accesses 100000
+			cdb_alu_accesses 1200000
+			cdb_mul_accesses 0
+			cdb_fpu_accesses 0
+			IFU_duty_cycle 0.5
+			LSU_duty_cycle 0.25
+			MemManU_I_duty_cycle 0.5
+			MemManU_D_duty_cycle 0.25
+			ALU_duty_cycle 0.9
+			MUL_duty_cycle 0
+			FPU_duty_cycle 0.6
+			ALU_cdb_duty_cycle 0.9
+			MUL_cdb_duty_cycle 0
+			FPU_cdb_duty_cycle 0.6	
+			predictor
+			done
+			itlb
+				total_accesses 800000
+				total_misses 4
+				conflicts 0	
+			done
+			icache
+				read_accesses 200000
+				read_misses 0
+				conflicts 0				
+			done
+			dtlb
+				total_accesses 200000
+				total_misses 4
+				conflicts 0	
+			done
+			dcache
+				read_accesses 200000
+				write_accesses 27276
+				read_misses 1632
+				write_misses 183
+				conflicts 0	
+			done
+			BTB
+			done
+	done
+		l1d 0
+				read_accesses 800000
+				write_accesses 27276
+				read_misses 1632
+				write_misses 183
+				conflicts 20	
+				duty_cycle 0.45	
+		done
+		l2d 0
+				read_accesses 58824
+				write_accesses 27276
+				read_misses 1632
+				write_misses 183
+				conflicts 100
+				duty_cycle 0.45				    
+		done
+		l2 0
+				read_accesses 400000
+				write_accesses 0
+				read_misses 0
+				write_misses 0
+				conflicts 0	
+			    duty_cycle 0.25	
+		done
+l3 0
+				read_accesses 58824
+				write_accesses 27276
+				read_misses 1632
+				write_misses 183
+				conflicts 0	
+			    duty_cycle 0.25				
+		done
+		mem
+			memory_accesses 66666
+			memory_reads 33333
+			memory_writes 33333
+		done
+output
+done

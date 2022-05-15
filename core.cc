@@ -3868,6 +3868,7 @@ void Core::computeEnergy(bool is_tdp)
 	double pppm_t[4]    = {1,1,1,1};
     double rtp_pipeline_coe;
     double num_units = 4.0;
+  power.reset(); rt_power.reset();
 	if (is_tdp)
 	{
 		ifu->computeEnergy(is_tdp);

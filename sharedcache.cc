@@ -599,6 +599,8 @@ SharedCache::SharedCache(ParseXML* XML_interface, int ithCache_, InputParameter*
 
 void SharedCache::computeEnergy(bool is_tdp)
 {
+  power.reset();
+  rt_power.reset();
 	double homenode_data_access = (cachep.dir_ty==SBT)? 0.9:1.0;
 	if (is_tdp)
 	{

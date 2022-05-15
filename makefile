@@ -10,6 +10,9 @@ dbg: $(TAR).mk obj_dbg
 opt: $(TAR).mk obj_opt
 	@$(MAKE) TAG=opt -C . -f $(TAR).mk
 
+multi: $(TAR).mk obj_opt
+	@$(MAKE) TAG=opt -C . -f $(TAR).mk multi
+
 obj_dbg:
 	mkdir $@
 
@@ -26,3 +29,4 @@ clean_opt: obj_opt
 	@$(MAKE) TAG=opt -C . -f $(TAR).mk clean
 	rm -rf $<
 
+.PHONY: multi

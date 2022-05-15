@@ -4,7 +4,7 @@ SHELL = /bin/sh
 .SUFFIXES: .cc .o
 
 ifndef NTHREADS
-  NTHREADS = 4
+  NTHREADS = 16
 endif
 
 
@@ -16,14 +16,15 @@ ifeq ($(TAG),dbg)
   OPT = -ggdb -g -O0 -DNTHREADS=1 -Icacti
 else
   DBG = 
-  OPT = -O3 -msse2 -mfpmath=sse -DNTHREADS=$(NTHREADS) -Icacti
+  # OPT = -O3 -msse2 -mfpmath=sse -DNTHREADS=$(NTHREADS) -Icacti
+  OPT = -O3 -march=native -mtune=native -DNTHREADS=$(NTHREADS) -Icacti
   #OPT = -O0 -DNTHREADS=$(NTHREADS)
 endif
 
 #CXXFLAGS = -Wall -Wno-unknown-pragmas -Winline $(DBG) $(OPT) 
 CXXFLAGS = -Wno-unknown-pragmas $(DBG) $(OPT) 
-CXX = g++ -m32
-CC  = gcc -m32
+CXX = g++
+CC  = gcc
 
 VPATH = cacti
 
@@ -80,3 +81,8 @@ clean:
 	-rm -f *.o $(TARGET)
 
 
+multi.o : multi.cc
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+multi : multi.o $(filter-out obj_$(TAG)/main.o,$(OBJS))
+	$(CXX) $^ -o $@ $(INCS) $(CXXFLAGS) $(LIBS) -pthread
