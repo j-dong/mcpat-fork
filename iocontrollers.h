@@ -31,9 +31,6 @@
 #ifndef IOCONTROLLERS_H_
 #define IOCONTROLLERS_H_
 
-
-#endif /* IOCONTROLLERS_H_ */
-
 #include "XML_Parse.h"
 #include "parameter.h"
 //#include "io.h"
@@ -84,3 +81,5 @@ class FlashController : public Component {
     ~FlashController(){};
 };
 
+
+#endif /* IOCONTROLLERS_H_ */

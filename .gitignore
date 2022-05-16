@@ -32,3 +32,4 @@ mcpat
 obj_opt/
 /multi
 /*.sbatch
+/serialize.gen.cpp.inc

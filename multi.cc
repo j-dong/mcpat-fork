@@ -2,6 +2,7 @@
 #include "core.h"
 #include "sharedcache.h"
 #include "memoryctrl.h"
+#include "serialize.h"
 
 #include <iostream>
 #include <fstream>
@@ -32,6 +33,27 @@ int main(int argc, char **argv) {
         cerr << "usage: " << argv[0] << " FILENAME DYNFILE" << endl;
         return 1;
     }
+
+    if (strcmp("ser", argv[2]) == 0) {
+        cout << "SERIALIZATION TEST MODE";
+        char *fn = argv[1];
+        ParseXML *xml = new ParseXML();
+        cout << ("parsing XML...\n");
+        xml->parse(fn);
+        cout << ("initializing...\n");
+        Processor proc(xml);
+        cout << ("energy:\n");
+        proc.displayEnergy(2, 5);
+        return 0;
+    }
+
+    if (strcmp("des", argv[2]) == 0) {
+        cout << "DESERIALIZATION TEST MODE";
+        Processor *proc = deserialize(argv[1]);
+        proc->displayEnergy(2, 5);
+        return 0;
+    }
+
     char *fn = argv[1];
     char *dynf = argv[2];
     ParseXML *xml = new ParseXML();
@@ -91,7 +113,7 @@ int main(int argc, char **argv) {
             cout << "mem" << endl;
             handle_mem(&xml->sys.mem);
         }
-	if (command == "output") {
+        if (command == "output") {
             cout << "output" << endl;
             cout << endl;
 

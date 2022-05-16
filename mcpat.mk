@@ -22,7 +22,7 @@ else
 endif
 
 #CXXFLAGS = -Wall -Wno-unknown-pragmas -Winline $(DBG) $(OPT) 
-CXXFLAGS = -Wno-unknown-pragmas $(DBG) $(OPT) 
+CXXFLAGS += -Wno-unknown-pragmas $(DBG) $(OPT) 
 CXX = g++ -std=c++17
 CC  = gcc
 
@@ -80,6 +80,10 @@ obj_$(TAG)/%.o : %.cc
 clean:
 	-rm -f *.o $(TARGET)
 
+obj_$(TAG)/serialize.o : serialize.gen.cpp.inc
+
+serialize.gen.cpp.inc : gen_ser.py
+	python3 $<
 
 multi : obj_$(TAG)/multi.o obj_$(TAG)/serialize.o $(filter-out obj_$(TAG)/main.o,$(OBJS))
 	$(CXX) $^ -o $@ $(INCS) $(CXXFLAGS) $(LIBS) -pthread

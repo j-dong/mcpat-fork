@@ -40,6 +40,9 @@
 #include <vector>
 #include "basic_components.h"
 
+class Pipeline;
+class selection_logic;
+
 class MCBackend : public Component {
   public:
     InputParameter l_ip;
