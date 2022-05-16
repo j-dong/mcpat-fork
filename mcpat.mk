@@ -23,7 +23,7 @@ endif
 
 #CXXFLAGS = -Wall -Wno-unknown-pragmas -Winline $(DBG) $(OPT) 
 CXXFLAGS = -Wno-unknown-pragmas $(DBG) $(OPT) 
-CXX = g++
+CXX = g++ -std=c++17
 CC  = gcc
 
 VPATH = cacti
@@ -81,8 +81,5 @@ clean:
 	-rm -f *.o $(TARGET)
 
 
-multi.o : multi.cc
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-multi : multi.o $(filter-out obj_$(TAG)/main.o,$(OBJS))
+multi : obj_$(TAG)/multi.o obj_$(TAG)/serialize.o $(filter-out obj_$(TAG)/main.o,$(OBJS))
 	$(CXX) $^ -o $@ $(INCS) $(CXXFLAGS) $(LIBS) -pthread
