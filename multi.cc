@@ -35,21 +35,24 @@ int main(int argc, char **argv) {
     }
 
     if (strcmp("ser", argv[2]) == 0) {
-        cout << "SERIALIZATION TEST MODE";
+        cout << "SERIALIZATION TEST MODE" << endl;
         char *fn = argv[1];
         ParseXML *xml = new ParseXML();
         cout << ("parsing XML...\n");
         xml->parse(fn);
         cout << ("initializing...\n");
         Processor proc(xml);
+        cout << ("serializing...\n");
+        serialize(proc, "saved_proc.bin");
         cout << ("energy:\n");
         proc.displayEnergy(2, 5);
         return 0;
     }
 
     if (strcmp("des", argv[2]) == 0) {
-        cout << "DESERIALIZATION TEST MODE";
-        Processor *proc = deserialize(argv[1]);
+        cout << "DESERIALIZATION TEST MODE" << endl;
+        Processor *proc = deserialize("saved_proc.bin");
+        cout << "done deserializing" << endl;
         proc->displayEnergy(2, 5);
         return 0;
     }

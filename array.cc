@@ -66,7 +66,10 @@ ArrayST::ArrayST(const InputParameter *configure_interface,
 void ArrayST::compute_base_power()
     {
 	//l_ip.out_w               =l_ip.line_sz*8;
-    local_result=cacti_interface(&l_ip);
+	local_result=cacti_interface(&l_ip);
+	// Ucache doesn't clean up, which screws up serialization
+	if (local_result.tag_array2) local_result.tag_array2->arr_min = nullptr;
+	if (local_result.data_array2) local_result.data_array2->arr_min = nullptr;
 	assert(local_result.cycle_time>0);
 	assert(local_result.access_time>0);
 //    if (name == "Int FrontRAT")

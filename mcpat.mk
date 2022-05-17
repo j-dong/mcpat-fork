@@ -12,8 +12,8 @@ LIBS =
 INCS = -lm
 
 ifeq ($(TAG),dbg)
-  DBG = -Wall 
-  OPT = -ggdb -g -O0 -DNTHREADS=1 -Icacti
+  DBG =
+  OPT = -g -O0 -DNTHREADS=1 -Icacti
 else
   DBG = 
   # OPT = -O3 -msse2 -mfpmath=sse -DNTHREADS=$(NTHREADS) -Icacti
@@ -85,5 +85,12 @@ obj_$(TAG)/serialize.o : serialize.gen.cpp.inc
 serialize.gen.cpp.inc : gen_ser.py
 	python3 $<
 
+win_manifest.res : win_manifest.rc win_manifest.xml
+	windres --input $< --output $@ --output-format=coff
+
 multi : obj_$(TAG)/multi.o obj_$(TAG)/serialize.o $(filter-out obj_$(TAG)/main.o,$(OBJS))
 	$(CXX) $^ -o $@ $(INCS) $(CXXFLAGS) $(LIBS) -pthread
+
+ifeq ($(OS),Windows_NT)
+    multi : win_manifest.res
+endif

@@ -44,13 +44,25 @@
 #include <cstdint>
 #include <vector>
 #include <unordered_map>
+#include <fstream>
+#include <cxxabi.h>
 
-#include <fcntl.h>
-#include <sys/io.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <unistd.h>
+#ifdef _WIN32
+# define WIN32_LEAN_AND_MEAN
+# undef PCH
+# include <windows.h>
+#elif defined(__unix__)
+# include <fcntl.h>
+# include <sys/io.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <sys/mman.h>
+# include <unistd.h>
+#else
+# error "unsupported platform"
+#endif
+
+constexpr bool SERDES_DEBUG = false;
 
 struct ser_reg {
     std::vector<uint8_t> data;
@@ -231,9 +243,39 @@ namespace {
     };
 }
 
+template<typename T>
+struct Demangle {
+    const char *data;
+    char *to_free;
+
+    Demangle() {
+        const char *T_name = typeid(T).name();
+        int status;
+        char *unmangled = abi::__cxa_demangle(T_name, 0, 0, &status);
+        if (unmangled) {
+            to_free = unmangled;
+            data = unmangled;
+        } else {
+            to_free = nullptr;
+            data = T_name;
+        }
+    }
+
+    ~Demangle() { free(to_free); data = to_free = nullptr; }
+
+    friend std::ostream &operator<<(std::ostream &s, const Demangle &d) {
+        return s << d.data;
+    }
+};
+
 template<class U, class Alloc>
 void serdes<std::vector<U, Alloc>>::ser(const std::vector<U, Alloc> &x, size_t p, ser_reg &reg) {
     p = ::align<size_t>(p);
+    if (SERDES_DEBUG) {
+        std::cout << "-- serializing vector<" << Demangle<U>{} << ">" << std::endl;
+        std::cout << "     at location " << p << std::endl;
+        std::cout << "     of size " << x.size() << std::endl;
+    }
     *(size_t *) (reg.data.data() + p) = x.size(); p = add<size_t>(p);
     size_t b = ::align<U>(reg.data.size());
     size_t start = b;
@@ -250,7 +292,15 @@ void serdes<std::vector<U, Alloc>>::des(std::vector<U, Alloc> &x, const uint8_t 
     // cursed
     new((void *) &x) std::vector<U>;
     p = ::align<size_t>(p);
+    if (SERDES_DEBUG) {
+        std::cout << "-- deserializing vector<" << Demangle<U>{} << ">" << std::endl;
+        std::cout << "     at location " << (p - reg.data) << std::endl;
+        // std::cout << "     of size " << x.size() << std::endl;
+    }
     size_t size = *(const size_t *) p; p = add<size_t>(p);
+    if (SERDES_DEBUG) {
+        std::cout << "     of size " << size << std::endl;
+    }
     if constexpr (std::is_trivial<U>::value) {
         x.resize(size);
     } else {
@@ -272,12 +322,24 @@ void serdes<std::vector<U, Alloc>>::des(std::vector<U, Alloc> &x, const uint8_t 
     }
 }
 
+static constexpr size_t INVALID_PTR = SIZE_MAX;
+
 template<class U>
 void serdes<const U *>::ser(const U *const &x, size_t p, ser_reg &reg) {
     p = ::align<size_t>(p);
+    if (SERDES_DEBUG) {
+        std::cout << "-- serializing pointer to " << Demangle<U>{} << std::endl;
+        std::cout << "     at location " << p << std::endl;
+    }
+    if (x == nullptr) {
+        *(size_t *) (reg.data.data() + p) = INVALID_PTR;
+        if (SERDES_DEBUG) std::cout << "     => nullptr" << std::endl;
+        return;
+    }
     auto it = reg.pointer_map.find((void *) x);
     if (it != reg.pointer_map.end()) {
         *(size_t *) (reg.data.data() + p) = it->second;
+        if (SERDES_DEBUG) std::cout << "     => " << it->second << " (looked up)" << std::endl;
         return;
     }
     size_t b = ::align<U>(reg.data.size());
@@ -286,21 +348,37 @@ void serdes<const U *>::ser(const U *const &x, size_t p, ser_reg &reg) {
     b += serdes<U>::size;
     reg.reserve(b);
     reg.pointer_map[(void *) x] = start;
+    if (SERDES_DEBUG) {
+        std::cout << "     -> " << start << std::endl;
+    }
     serdes<U>::ser(*x, start, reg);
 }
 
 template<class U>
 void serdes<const U *>::des(const U *&x, const uint8_t *p, des_reg &reg) {
     p = ::align<size_t>(p);
+    if (SERDES_DEBUG) {
+        std::cout << "-- deserializing pointer to " << Demangle<U>{} << std::endl;
+        std::cout << "     at location " << (p - reg.data) << std::endl;
+    }
     size_t start = *(size_t *) p;
+    if (start == INVALID_PTR) {
+        x = nullptr;
+        if (SERDES_DEBUG) std::cout << "     => nullptr" << std::endl;
+        return;
+    }
     auto it = reg.pointer_map.find(start);
     if (it != reg.pointer_map.end()) {
         x = (const U *) it->second;
+        if (SERDES_DEBUG) std::cout << "     => " << start << " (looked up)" << std::endl;
         return;
     }
     x = (U *) operator new(sizeof(U));
     reg.pointer_map[start] = (void *) x;
-    serdes<U>::des(*const_cast<U *>(x), p, reg);
+    if (SERDES_DEBUG) {
+        std::cout << "     -> " << start << std::endl;
+    }
+    serdes<U>::des(*const_cast<U *>(x), reg.data + start, reg);
 }
 
 void serialize(const Processor &p, const char *fn) {
@@ -308,9 +386,86 @@ void serialize(const Processor &p, const char *fn) {
     reg.data.reserve(4096);
     reg.reserve(serdes<Processor>::size);
     serdes<Processor>::ser(p, (size_t) 0, reg);
+    fstream file{fn, std::ios::out | std::ios::binary};
+    file.write((const char *) reg.data.data(), reg.data.size());
+    file.close();
 }
 
+#ifdef _WIN32
+void win32_perror(const char *s) {
+    DWORD dwError = GetLastError();
+    LPVOID lpMsgBuf;
+    FormatMessageA(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER
+        | FORMAT_MESSAGE_FROM_SYSTEM
+        | FORMAT_MESSAGE_IGNORE_INSERTS, // dwFlags
+        NULL, // lpSource
+        dwError, // dwMessageId
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // dwLanguageId
+        (LPSTR) &lpMsgBuf, // lpBuffer
+        0, NULL); // nSize, Arguments
+    fprintf(stderr, "%s: %s\n", s, lpMsgBuf);
+    LocalFree(lpMsgBuf);
+}
+#endif
+
 Processor *deserialize(const char *fn) {
+#ifdef _WIN32
+    HANDLE hFile, hMap;
+    LPVOID lpBasePtr;
+    LARGE_INTEGER liFileSize;
+    hFile = CreateFileA(
+        fn,
+        GENERIC_READ, // dwDesiredAccess
+        0, // dwShareMode
+        NULL, // lpSecurityAttributes
+        OPEN_EXISTING, // dwCreationDisposition
+        FILE_ATTRIBUTE_NORMAL, // dwFlagsAndAttributes
+        0); // hTemplateFile
+    if (hFile == INVALID_HANDLE_VALUE) {
+        win32_perror("deserialize|CreateFileA");
+        return nullptr;
+    }
+    if (!GetFileSizeEx(hFile, &liFileSize)) {
+        win32_perror("deserialize|GetFileSizeEx");
+        CloseHandle(hFile);
+        return nullptr;
+    }
+    if (liFileSize.QuadPart == 0) {
+        fprintf(stderr, "deserialization error: file is empty\n");
+        CloseHandle(hFile);
+        return nullptr;
+    }
+    hMap = CreateFileMappingA(
+        hFile,
+        NULL, // lpFileMappingAttributes
+        PAGE_READONLY, // flProtect
+        0, 0, // dwMaximumSizeHigh/Low
+        NULL); //lpName
+    if (hMap == NULL) {
+        win32_perror("deserialize|CreateFileMappingA");
+        CloseHandle(hFile);
+        return nullptr;
+    }
+    lpBasePtr = MapViewOfFile(
+        hMap,
+        FILE_MAP_READ, // dwDesiredAccess
+        0, 0, // dwFileOffsetHigh/Low
+        0); // dwNumberOfBytesToMap
+    if (lpBasePtr == NULL) {
+        win32_perror("deserialize|MapViewOfFile");
+        CloseHandle(hMap);
+        CloseHandle(hFile);
+        return nullptr;
+    }
+    des_reg reg;
+    reg.data = (uint8_t *) lpBasePtr;
+    auto ret = (Processor *) operator new(sizeof(Processor));
+    serdes<Processor>::des(*ret, reg.data, reg);
+    CloseHandle(hMap);
+    CloseHandle(hFile);
+    return ret;
+#elif defined(__unix__)
     int fd = open(fn, O_RDONLY);
     if (fd < 0) {
         perror("deserialize|open");
@@ -332,8 +487,9 @@ Processor *deserialize(const char *fn) {
     des_reg reg;
     reg.data = buf;
     auto ret = (Processor *) operator new(sizeof(Processor));
-    serdes<Processor>::des(*ret, buf, reg);
+    serdes<Processor>::des(*ret, reg.data, reg);
     munmap(buf, fsize);
     close(fd);
     return ret;
+#endif
 }

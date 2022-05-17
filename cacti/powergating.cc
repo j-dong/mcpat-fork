@@ -116,6 +116,8 @@ double Sleep_tx::compute_penalty()
 	double c_load;
 	double p_to_n_sz_ratio = pmos_to_nmos_sz_ratio(false, false, true);
 
+	return 0.0;
+
 	if (is_footer)
 	{
 		c_intrinsic_sleep = drain_C_(width, NCH, 1, 1, area.h, false, false, false,is_sleep_tx);
