@@ -107,17 +107,22 @@ def block(cls):
 # header = open('serialize.gen.h.inc', 'w')
 impl = open('serialize.gen.cpp.inc', 'w')
 
-print('''
-// vim: ft=cpp
+print('''// vim: set ft=cpp:
 
 #ifndef FORWARD_DECLS
 ''', file=impl)
+
+def fix_long(ty):
+    # change long to long long because Windows is stupid
+    if ty in ('long', 'unsigned long'):
+        ty += ' long'
+    return ty
 
 def split_type(ty):
     if (type_kind_is_primitive(ty.kind)
             or ty.kind == TypeKind.RECORD
             or ty.kind == TypeKind.ENUM):
-        return (ty.spelling + ' ', '', False)
+        return (fix_long(ty.spelling) + ' ', '', False)
     elif ty.kind == TypeKind.CONSTANTARRAY:
         l, r, ref = split_type(ty.element_type)
         if ref: raise Exception('cannot have array of reference')
@@ -200,7 +205,7 @@ template struct hack_Accessor_{hack_counter}<
         ref, = filter(lambda x: x.kind == CursorKind.TYPE_REF,
                       node.get_children())
         inner = ref.referenced.enum_type
-        inner_t = inner.get_canonical().spelling
+        inner_t = fix_long(inner.get_canonical().spelling)
         outer_t = ty.spelling
         return (
             inner_t,
@@ -216,7 +221,7 @@ template struct hack_Accessor_{hack_counter}<
 
 class TypeInfo:
     def __init__(self, node):
-        self.name = node.type.get_canonical().spelling
+        self.name = fix_long(node.type.get_canonical().spelling)
         self.debug_info = f'''
 location: {node.location.file}:{node.location.line}|{node.location.column}
 parents: {' -> '.join(n.spelling for n in parents)}

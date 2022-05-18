@@ -1,5 +1,4 @@
-
-// vim: ft=cpp
+// vim: set ft=cpp:
 
 #ifndef FORWARD_DECLS
 
@@ -3702,7 +3701,7 @@ struct serdes<interconnect> {
 };
 
 /*
-location: core.h:236|7
+location: core.h:241|7
 parents: core.h
 */
 template<>
@@ -3753,7 +3752,7 @@ struct serdes<Core> {
 };
 
 /*
-location: core.h:204|7
+location: core.h:209|7
 parents: core.h
 */
 template<>
@@ -3816,7 +3815,7 @@ struct serdes<EXECU> {
 };
 
 /*
-location: core.h:183|7
+location: core.h:188|7
 parents: core.h
 */
 template<>
@@ -3863,7 +3862,7 @@ struct serdes<RegFU> {
 };
 
 /*
-location: core.h:164|7
+location: core.h:169|7
 parents: core.h
 */
 template<>
@@ -3904,7 +3903,7 @@ struct serdes<MemManU> {
 };
 
 /*
-location: core.h:116|7
+location: core.h:121|7
 parents: core.h
 */
 template<>
@@ -3953,7 +3952,7 @@ struct serdes<RENAMINGU> {
 };
 
 /*
-location: core.h:94|7
+location: core.h:99|7
 parents: core.h
 */
 template<>
@@ -4004,7 +4003,7 @@ struct serdes<SchedulerU> {
 };
 
 /*
-location: core.h:44|7
+location: core.h:49|7
 parents: core.h
 */
 template<>
@@ -4080,7 +4079,7 @@ struct serdes<InstCache> {
 };
 
 /*
-location: core.h:68|7
+location: core.h:73|7
 parents: core.h
 */
 template<>
@@ -4234,7 +4233,7 @@ struct serdes<SharedCache> {
 };
 
 /*
-location: core.h:142|7
+location: core.h:147|7
 parents: core.h
 */
 template<>
