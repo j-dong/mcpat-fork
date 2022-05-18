@@ -269,6 +269,9 @@ InstFetchU::InstFetchU(ParseXML* XML_interface, int ithCore_, InputParameter* in
 
     	  BPT = new BranchPredictor(XML, ithCore, &interface_ip,coredynp);
     	  area.set_area(area.get_area()+ BPT->area.get_area());
+      } else {
+          BTB = nullptr;
+          BPT = nullptr;
       }
 
       ID_inst = new inst_decoder(is_default, &interface_ip,

@@ -114,8 +114,10 @@ print('''// vim: set ft=cpp:
 
 def fix_long(ty):
     # change long to long long because Windows is stupid
-    if ty in ('long', 'unsigned long'):
-        ty += ' long'
+    if ty == 'long':
+        return 'int64_t'
+    elif ty == 'unsigned long':
+        return 'uint64_t'
     return ty
 
 def split_type(ty):
