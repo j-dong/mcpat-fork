@@ -385,10 +385,22 @@ void serialize(const Processor &p, const char *fn) {
     ser_reg reg;
     reg.data.reserve(4096);
     reg.reserve(serdes<Processor>::size);
+    size_t global_begin = reg.data.size();
+    reg.reserve(global_begin + serdes<TechnologyParameter>::size);
     serdes<Processor>::ser(p, (size_t) 0, reg);
+    serdes<TechnologyParameter>::ser(g_tp, global_begin, reg);
     fstream file{fn, std::ios::out | std::ios::binary};
     file.write((const char *) reg.data.data(), reg.data.size());
     file.close();
+}
+
+Processor *do_des(uint8_t *buf) {
+    des_reg reg;
+    reg.data = buf;
+    auto ret = (Processor *) operator new(sizeof(Processor));
+    serdes<Processor>::des(*ret, buf, reg);
+    serdes<TechnologyParameter>::des(g_tp, buf + serdes<Processor>::size, reg);
+    return ret;
 }
 
 #ifdef _WIN32
@@ -458,10 +470,7 @@ Processor *deserialize(const char *fn) {
         CloseHandle(hFile);
         return nullptr;
     }
-    des_reg reg;
-    reg.data = (uint8_t *) lpBasePtr;
-    auto ret = (Processor *) operator new(sizeof(Processor));
-    serdes<Processor>::des(*ret, reg.data, reg);
+    Processor *ret = do_des((uint8_t *) lpBasePtr);
     CloseHandle(hMap);
     CloseHandle(hFile);
     return ret;
@@ -484,12 +493,21 @@ Processor *deserialize(const char *fn) {
         close(fd);
         return nullptr;
     }
-    des_reg reg;
-    reg.data = buf;
-    auto ret = (Processor *) operator new(sizeof(Processor));
-    serdes<Processor>::des(*ret, reg.data, reg);
+    Processor *ret = do_des(buf);
     munmap(buf, fsize);
     close(fd);
     return ret;
 #endif
 }
+
+// template<size_t N>
+// struct SS {
+//     template<bool B>
+//     struct SB {
+//         static_assert(B, "printed value above");
+//     };
+// };
+//
+// namespace {
+//     SS<serdes<Processor>::size>::SB<false> dummy() {}
+// }

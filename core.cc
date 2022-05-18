@@ -59,7 +59,6 @@ InstFetchU::InstFetchU(ParseXML* XML_interface, int ithCore_, InputParameter* in
 	  bool debug= false, is_default = true;
 
 	  clockRate = coredynp.clockRate;
-	  executionTime = coredynp.executionTime;
 	  cache_p = (Cache_policy)XML->sys.core[ithCore].icache.icache_config[7];
 	  //Assuming all L1 caches are virtually idxed physically tagged.
 	  //cache
@@ -321,7 +320,6 @@ BranchPredictor::BranchPredictor(ParseXML* XML_interface, int ithCore_, InputPar
 	int  tag, data;
 
 	clockRate = coredynp.clockRate;
-	executionTime = coredynp.executionTime;
 	interface_ip.assoc               = 1;
 	interface_ip.pure_cam            = false;
 	if (coredynp.multithreaded)
@@ -467,7 +465,6 @@ SchedulerU::SchedulerU(ParseXML* XML_interface, int ithCore_, InputParameter* in
 	string tmp_name;
 
 	clockRate = coredynp.clockRate;
-	executionTime = coredynp.executionTime;
 	if ((coredynp.core_ty==Inorder && coredynp.multithreaded))
 	{
 		//Instruction issue queue, in-order multi-issue or multithreaded processor also has this structure. Unified window for Inorder processors
@@ -723,7 +720,6 @@ LoadStoreU::LoadStoreU(ParseXML* XML_interface, int ithCore_, InputParameter* in
 	  int ldst_opcode = XML->sys.core[ithCore].opcode_width;//16;
 
 	  clockRate = coredynp.clockRate;
-	  executionTime = coredynp.executionTime;
 	  cache_p = (Cache_policy)XML->sys.core[ithCore].dcache.dcache_config[7];
 
 	  interface_ip.num_search_ports    = XML->sys.core[ithCore].memory_ports;
@@ -947,7 +943,6 @@ MemManU::MemManU(ParseXML* XML_interface, int ithCore_, InputParameter* interfac
 	  bool debug= false;
 
 	  clockRate = coredynp.clockRate;
-	  executionTime = coredynp.executionTime;
 	  interface_ip.is_cache			   = true;
 	  interface_ip.pure_cam            = false;
 	  interface_ip.pure_ram            = false;
@@ -1026,7 +1021,6 @@ RegFU::RegFU(ParseXML* XML_interface, int ithCore_, InputParameter* interface_ip
 	int  data;
 
 	clockRate = coredynp.clockRate;
-	executionTime = coredynp.executionTime;
 	//**********************************IRF***************************************
 	data							 = coredynp.int_data_width;
 	interface_ip.is_cache			 = false;
@@ -1138,7 +1132,6 @@ EXECU::EXECU(ParseXML* XML_interface, int ithCore_, InputParameter* interface_ip
 	  if (!exist) return;
 	  double fu_height = 0.0;
       clockRate = coredynp.clockRate;
-      executionTime = coredynp.executionTime;
 	  rfu   = new RegFU(XML, ithCore, &interface_ip,coredynp);
 	  scheu = new SchedulerU(XML, ithCore, &interface_ip,coredynp);
 	  exeu  = new FunctionalUnit(XML, ithCore,&interface_ip, coredynp, ALU);
@@ -1354,7 +1347,6 @@ RENAMINGU::RENAMINGU(ParseXML* XML_interface, int ithCore_, InputParameter* inte
 //	interface_ip.wire_os_mat_type = 0;
 //	interface_ip.wt               = Global_30;
 	clockRate = coredynp.clockRate;
-	executionTime = coredynp.executionTime;
     if (coredynp.core_ty==OOO)
     {
 	//integer pipeline
@@ -2017,6 +2009,7 @@ void BranchPredictor::computeEnergy(bool is_tdp)
 void BranchPredictor::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
 	if (!exist) return;
+  SET_TIME_PARAMS;
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;
@@ -2274,6 +2267,7 @@ void InstFetchU::computeEnergy(bool is_tdp)
 void InstFetchU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
 	if (!exist) return;
+  SET_TIME_PARAMS;
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;
@@ -2782,6 +2776,7 @@ void RENAMINGU::computeEnergy(bool is_tdp)
 void RENAMINGU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
 	if (!exist) return;
+  SET_TIME_PARAMS;
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;
@@ -3106,6 +3101,7 @@ void SchedulerU::computeEnergy(bool is_tdp)
 void SchedulerU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
 	if (!exist) return;
+  SET_TIME_PARAMS;
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;
@@ -3385,6 +3381,7 @@ void LoadStoreU::computeEnergy(bool is_tdp)
 void LoadStoreU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
 	if (!exist) return;
+  SET_TIME_PARAMS;
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;
@@ -3522,6 +3519,7 @@ void MemManU::computeEnergy(bool is_tdp)
 void MemManU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
 	if (!exist) return;
+  SET_TIME_PARAMS;
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;
@@ -3662,6 +3660,7 @@ void RegFU::computeEnergy(bool is_tdp)
 void RegFU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
 	if (!exist) return;
+  SET_TIME_PARAMS;
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;
@@ -3789,6 +3788,7 @@ void EXECU::computeEnergy(bool is_tdp)
 void EXECU::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
 	if (!exist) return;
+  SET_TIME_PARAMS;
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;
@@ -3865,6 +3865,8 @@ void Core::computeEnergy(bool is_tdp)
 	 * When computing dyn_power; power = total energy (the value computed in this function) / Total execution time (cycle count / clock rate)
 	 */
 	//power_point_product_masks
+        set_core_param();
+  SET_TIME_PARAMS;
 	double pppm_t[4]    = {1,1,1,1};
     double rtp_pipeline_coe;
     double num_units = 4.0;
@@ -4042,6 +4044,7 @@ void Core::computeEnergy(bool is_tdp)
 
 void Core::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
+  SET_TIME_PARAMS;
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;

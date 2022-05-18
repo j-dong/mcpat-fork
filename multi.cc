@@ -25,7 +25,7 @@ void handle_l1d(system_L1Directory *l1d);
 void handle_l2d(system_L2Directory *l2d);
 void handle_l2(system_L2 *l2);
 void handle_l3(system_L3 *l3);
-void handle_mem(system_mem *l3);
+void handle_mc(system_mc *mem);
 
 
 int main(int argc, char **argv) {
@@ -44,6 +44,8 @@ int main(int argc, char **argv) {
         Processor proc(xml);
         cout << ("serializing...\n");
         serialize(proc, "saved_proc.bin");
+        cout << ("computing...\n");
+        proc.compute();
         cout << ("energy:\n");
         proc.displayEnergy(2, 5);
         return 0;
@@ -53,22 +55,31 @@ int main(int argc, char **argv) {
         cout << "DESERIALIZATION TEST MODE" << endl;
         Processor *proc = deserialize("saved_proc.bin");
         cout << "done deserializing" << endl;
+        proc->compute();
+        cout << "done computing" << endl;
         proc->displayEnergy(2, 5);
         return 0;
     }
 
     char *fn = argv[1];
     char *dynf = argv[2];
-    ParseXML *xml = new ParseXML();
-    cout << ("parsing XML...\n");
-    xml->parse(fn);
-    cout << ("initializing...\n");
-    Processor proc(xml);
-    cout << ("energy:\n");
-    proc.displayEnergy(2, 5);
+    // ParseXML *xml = new ParseXML();
+    // cout << ("parsing XML...\n");
+    // xml->parse(fn);
+    // cout << ("initializing...\n");
+    // Processor proc(xml);
+    // proc.compute();
+    // cout << ("energy:\n");
+    // proc.displayEnergy(2, 5);
+
+    cout << "deserializing..." << endl;
+    Processor *proc = deserialize("saved_proc.bin");
+    cout << "done deserializing" << endl;
 
     cout << "--- BEGIN DYNAMIC" << endl;
     inF = new std::ifstream(dynf);
+
+    ParseXML *xml = proc->XML;
 
     while (inF->good()) {
         string command;
@@ -80,12 +91,12 @@ int main(int argc, char **argv) {
             xml->sys.total_cycles = x;
             // proc.set_proc_param();
             // set execution time
-            for (int i = 0; i < proc.cores.size(); i++) {
-                cout << "- resetting params for core " << i << endl;
-                proc.cores[i]->set_core_param();
-                cout << "- done: core " << i << endl;
-            }
-            cout << "- done resetting params" << endl;
+            // for (int i = 0; i < proc.cores.size(); i++) {
+            //     cout << "- resetting params for core " << i << endl;
+            //     proc.cores[i]->set_core_param();
+            //     cout << "- done: core " << i << endl;
+            // }
+            // cout << "- done resetting params" << endl;
         }
         if (command == "core") {
             int i; (*inF) >> i;
@@ -112,21 +123,9 @@ int main(int argc, char **argv) {
             cout << "l2d " << i << endl;
             handle_l2d(&xml->sys.L2Directory[i]);
         }
-        if (command == "mem") {
-            cout << "mem" << endl;
-            handle_mem(&xml->sys.mem);
-        }
-        if (command == "output") {
-            cout << "output" << endl;
-            cout << endl;
-
-            cout << "- computing" << endl;
-            proc.compute();
-
-            cout << "BEGIN OUTPUT" << endl;
-            proc.displayEnergy(2, 5);
-            cout << "END OUTPUT" << endl;
-            cout << endl;
+        if (command == "mc") {
+            cout << "mc" << endl;
+            handle_mc(&xml->sys.mc);
         }
         if (command == "done") {
             cout << "done - exiting" << endl;
@@ -134,8 +133,12 @@ int main(int argc, char **argv) {
         }
     }
 
+    cout << "computing!" << endl;
+    proc->compute();
+    proc->displayEnergy(2, 5);
+
     delete inF;
-    delete xml;
+    // delete proc; // segfaults; doesn't matter since we die anyway
     return 0;
 }
 
@@ -214,6 +217,17 @@ void handle_core(system_core *X) { LOOP {
     DBL(main_memory_read);
     DBL(main_memory_write);
     DBL(pipeline_duty_cycle);
+    DBL(IFU_duty_cycle);
+    DBL(BR_duty_cycle);
+    DBL(LSU_duty_cycle);
+    DBL(MemManU_I_duty_cycle);
+    DBL(MemManU_D_duty_cycle);
+    DBL(ALU_duty_cycle);
+    DBL(MUL_duty_cycle);
+    DBL(FPU_duty_cycle);
+    DBL(ALU_cdb_duty_cycle);
+    DBL(MUL_cdb_duty_cycle);
+    DBL(FPU_cdb_duty_cycle);
     DELEGATE(handle_core_, predictor);
     DELEGATE(handle_core_, itlb);
     DELEGATE(handle_core_, icache);
@@ -383,7 +397,7 @@ void handle_l3(system_L3 *X) { LOOP {
     DBL(dir_duty_cycle);
 } LOOPEND; }
 
-void handle_mem(system_mem *X) { LOOP {
+void handle_mc(system_mc *X) { LOOP {
     DBL(memory_accesses);
     DBL(memory_reads);
     DBL(memory_writes);

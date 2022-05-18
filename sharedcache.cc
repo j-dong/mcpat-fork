@@ -599,6 +599,7 @@ SharedCache::SharedCache(ParseXML* XML_interface, int ithCache_, InputParameter*
 
 void SharedCache::computeEnergy(bool is_tdp)
 {
+        set_cache_param();
   power.reset();
   rt_power.reset();
 	double homenode_data_access = (cachep.dir_ty==SBT)? 0.9:1.0;
@@ -834,6 +835,7 @@ void SharedCache::displayEnergy(uint32_t indent,bool is_tdp)
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;
 	bool power_gating = XML->sys.power_gating;
+        set_cache_param();
 
 	if (is_tdp)
 	{

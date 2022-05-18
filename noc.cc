@@ -160,6 +160,7 @@ void NoC ::init_link_bus(double link_len_)
 }
 void NoC::computeEnergy(bool is_tdp)
 {
+    set_noc_param();
 	//power_point_product_masks
 	double pppm_t[4]    = {1,1,1,1};
 	double M=nocdynp.duty_cycle;
@@ -224,6 +225,7 @@ void NoC::computeEnergy(bool is_tdp)
 
 void NoC::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
+    set_noc_param();
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;

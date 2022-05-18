@@ -567,6 +567,8 @@ FunctionalUnit::FunctionalUnit(ParseXML *XML_interface, int ithCore_, InputParam
 
 void FunctionalUnit::computeEnergy(bool is_tdp)
 {
+    clockRate = XML->sys.core[ithCore].clock_rate * 1e6;
+    executionTime = XML->sys.total_cycles / clockRate;
 	double pppm_t[4]    = {1,1,1,1};
 	double FU_duty_cycle;
 	if (is_tdp)
@@ -595,8 +597,11 @@ void FunctionalUnit::computeEnergy(bool is_tdp)
 
 	    //power.readOp.dynamic = base_energy/clockRate + energy*stats_t.readAc.access;
 	    power.readOp.dynamic = per_access_energy*stats_t.readAc.access + base_energy/clockRate;
+            // cout << "||| power.readOp.dynamic set to " << power.readOp.dynamic << endl;
 		double sckRation = g_tp.sckt_co_eff;
 		power.readOp.dynamic *= sckRation*FU_duty_cycle;
+            // cout << "||| sckRation is " << sckRation << "; FU_duty_cycle is " << FU_duty_cycle << endl;
+            // cout << "||| power.readOp.dynamic multiplied; set to " << power.readOp.dynamic << endl;
 		power.writeOp.dynamic *= sckRation;
 		power.searchOp.dynamic *= sckRation;
 
@@ -631,19 +636,28 @@ void FunctionalUnit::computeEnergy(bool is_tdp)
 		}
 
 	    //rt_power.readOp.dynamic = base_energy*executionTime + energy*stats_t.readAc.access;
+    clockRate = XML->sys.core[ithCore].clock_rate * 1e6;
+    executionTime = XML->sys.total_cycles / clockRate;
 	    rt_power.readOp.dynamic = per_access_energy*stats_t.readAc.access + base_energy*executionTime;
+            // cout << "||| power.readOp.dynamic set to " << power.readOp.dynamic << endl;
 		double sckRation = g_tp.sckt_co_eff;
 		rt_power.readOp.dynamic *= sckRation;
+            // cout << "||| power.readOp.dynamic multiplied; set to " << power.readOp.dynamic << endl;
 		rt_power.writeOp.dynamic *= sckRation;
 		rt_power.searchOp.dynamic *= sckRation;
 
 	}
 
 
+            // cout << "||| power.readOp.dynamic at end: " << power.readOp.dynamic << endl;
 }
 
 void FunctionalUnit::displayEnergy(uint32_t indent,int plevel,bool is_tdp)
 {
+    clockRate = XML->sys.core[ithCore].clock_rate * 1e6;
+    executionTime = XML->sys.total_cycles / clockRate;
+    // cout << "||| power.readOp.dynamic is " << power.readOp.dynamic << endl;
+    // cout << "||| rt_power.readOp.dynamic is " << rt_power.readOp.dynamic << endl;
 	string indent_str(indent, ' ');
 	string indent_str_next(indent+2, ' ');
 	bool long_channel = XML->sys.longer_channel_device;

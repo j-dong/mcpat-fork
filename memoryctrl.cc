@@ -422,6 +422,14 @@ void MCFrontEnd::computeEnergy(bool is_tdp)
 	    	writeBuffer->stats_t.readAc.access  = XML->sys.mc.memory_writes*mcp.llcBlockSize*8.0/mcp.dataBusWidth;
 	    	writeBuffer->stats_t.writeAc.access = XML->sys.mc.memory_writes*mcp.llcBlockSize*8.0/mcp.dataBusWidth;
 	    	writeBuffer->rtp_stats = writeBuffer->stats_t;
+
+                // cout << "||| frontendBuffer READS:  " << frontendBuffer->rtp_stats. readAc.access << endl;
+                // cout << "||| frontendBuffer WRITES: " << frontendBuffer->rtp_stats.writeAc.access << endl;
+                // cout << "|||     readBuffer READS:  " <<     readBuffer->rtp_stats. readAc.access << endl;
+                // cout << "|||     readBuffer WRITES: " <<     readBuffer->rtp_stats.writeAc.access << endl;
+                // cout << "|||    writeBuffer READS:  " <<    writeBuffer->rtp_stats. readAc.access << endl;
+                // cout << "|||    writeBuffer WRITES: " <<    writeBuffer->rtp_stats.writeAc.access << endl;
+                // cout << "||| XML pointer: " << (size_t) XML << endl;
 	    }
 
 	frontendBuffer->power_t.reset();
@@ -437,12 +445,17 @@ void MCFrontEnd::computeEnergy(bool is_tdp)
 				+ frontendBuffer->stats_t.readAc.access * frontendBuffer->local_result.power.readOp.dynamic
 				+ frontendBuffer->stats_t.writeAc.access*frontendBuffer->local_result.power.writeOp.dynamic;
 
+        // cout << "||| frontendBuffer power: " << frontendBuffer->power_t.readOp.dynamic << endl;
+
 	readBuffer->power_t.readOp.dynamic	+= (readBuffer->stats_t.readAc.access*
 			readBuffer->local_result.power.readOp.dynamic+
     		readBuffer->stats_t.writeAc.access*readBuffer->local_result.power.writeOp.dynamic);
 	writeBuffer->power_t.readOp.dynamic	+= (writeBuffer->stats_t.readAc.access*
 			writeBuffer->local_result.power.readOp.dynamic+
     		writeBuffer->stats_t.writeAc.access*writeBuffer->local_result.power.writeOp.dynamic);
+
+        // cout << "|||     readBuffer power: " <<     readBuffer->power_t.readOp.dynamic << endl;
+        // cout << "|||    writeBuffer power: " <<    writeBuffer->power_t.readOp.dynamic << endl;
 
 	if (is_tdp)
     {
@@ -458,7 +471,9 @@ void MCFrontEnd::computeEnergy(bool is_tdp)
     	        (frontendBuffer->local_result.power +
     	        		readBuffer->local_result.power +
     	        		writeBuffer->local_result.power)*pppm_lkg;
+        // cout << "||| total power: " << rt_power.readOp.dynamic << endl;
     	rt_power.readOp.dynamic = rt_power.readOp.dynamic + power.readOp.dynamic*0.1*mcp.clockRate*mcp.num_mcs*mcp.executionTime;
+        // cout << "||| total power (2): " << rt_power.readOp.dynamic << endl;
     }
 }
 
@@ -593,6 +608,7 @@ MemoryController::MemoryController(ParseXML *XML_interface,InputParameter* inter
 }
 void MemoryController::computeEnergy(bool is_tdp)
 {
+  set_mc_param();
 
 	frontend->computeEnergy(is_tdp);
 	transecEngine->computeEnergy(is_tdp);

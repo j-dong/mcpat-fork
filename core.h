@@ -41,6 +41,11 @@
 #include "basic_components.h"
 #include "sharedcache.h"
 
+#define SET_TIME_PARAMS do { \
+    clockRate = XML->sys.core[ithCore].clock_rate * 1e6; \
+    executionTime = XML->sys.total_cycles / clockRate; \
+} while (0)
+
 class BranchPredictor :public Component {
   public:
 
